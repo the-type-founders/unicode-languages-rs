@@ -1,20 +1,16 @@
 [package]
-name = "unicode-language"
+name = "unicode-languages"
 version = "2.3.0"
 edition = "2024"
 license = "Apache-2.0"
 authors = ["Bram Stein <b.l.stein@gmail.com>"]
 description = "A library to detect language coverage given a list of codepoints."
 documentation = "https://docs.rs/unicode-language"
-homepage = "https://github.com/the-type-founders/unicode-language-rs"
-repository = "https://github.com/the-type-founders/unicode-language-rs"
+homepage = "https://github.com/the-type-founders/unicode-languages-rs"
+repository = "https://github.com/the-type-founders/unicode-languages-rs"
 categories = ["text-processing"]
 keywords = ["unicode", "language"]
 build = "build.rs"
-
-[lib]
-name = "unicode_language"
-path = "src/lib.rs"
 
 [build-dependencies]
 glob = "0.3"
