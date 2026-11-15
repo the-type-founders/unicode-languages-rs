@@ -31,7 +31,7 @@ struct Match {
 }
 ```
 
-The language data is derived from [Adobe Font's speakeasy library](https://github.com/typekit/speakeasy). The data is extracted at build time and statically compiled as part of the library.
+The language data is derived from [Adobe Font's speakeasy library](https://github.com/typekit/speakeasy). The data is vendored in `vendor/speakeasy/data.json`, which is regenerated from the submodule by running `make -C vendor/speakeasy`, and statically compiled as part of the library.
 
 ## License
 
