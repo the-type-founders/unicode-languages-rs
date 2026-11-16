@@ -1,3 +1,7 @@
+# /// script
+# dependencies = ["language-tags", "pyyaml"]
+# ///
+
 import json
 import os
 import sys
