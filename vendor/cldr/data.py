@@ -106,7 +106,7 @@ names = {
 }
 
 data = []
-for locale, root in sorted(roots.items()):
+for locale, root in roots.items():
     # The main set, as opposed to the auxiliary one and such, has no type.
     sets = [
         element.text for element in root.findall(SETS) if element.get("type") is None
