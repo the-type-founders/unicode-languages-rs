@@ -7,7 +7,7 @@ use std::cmp;
 /// A language.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Language {
-    /// The BCP 47 code.
+    /// The BCP 47 tag.
     pub code: &'static str,
     /// The proper name in English, if known.
     pub name: Option<&'static str>,
