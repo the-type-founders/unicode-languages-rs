@@ -1,15 +1,14 @@
 [package]
 name = "unicode-languages"
-version = "2.3.1"
+version = "3.0.0"
 edition = "2024"
-license = "Apache-2.0"
-authors = ["Bram Stein <b.l.stein@gmail.com>"]
-description = "A library to detect language coverage given a list of codepoints."
+license = "Apache-2.0 OR MIT"
+authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
+description = "The package provides detection of languages from Unicode codepoints."
 documentation = "https://docs.rs/unicode-languages"
-homepage = "https://github.com/the-type-founders/unicode-languages-rs"
 repository = "https://github.com/the-type-founders/unicode-languages-rs"
 categories = ["text-processing"]
-keywords = ["unicode", "language"]
+keywords = ["language", "unicode"]
 
 [build-dependencies]
 serde = { version = "1", features = ["derive"] }

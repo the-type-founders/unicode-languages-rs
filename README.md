@@ -1,41 +1,18 @@
 # Unicode Languages [![Package][package-img]][package-url] [![Documentation][documentation-img]][documentation-url] [![Build][build-img]][build-url]
 
-This library detects language support given a list of Unicode codepoints. This is primarily useful for finding out what languages a font supports.
+The package provides detection of languages from Unicode codepoints.
 
-```rust
-// Input codepoints as a vector of Unicode ranges
-let codepoints = vec![[65, 121]];
+The implementation is based on the [Unicode Common Locale Data
+Repository][cldr] and [detect-writing-script].
 
-// Detect languages with a threshold of 0.5
-let results = detect(codepoints, 0.5);
+## Contribution
 
-// results[0].tag = "en"
-// results[1].tag = "nl"
-// ...
-```
+Your contribution is highly appreciated. Do not hesitate to open an issue or a
+pull request. Note that any contribution submitted for inclusion in the project
+will be licensed according to the terms given in [LICENSE.md](LICENSE.md).
 
-The result is a vector of `Match` structs, with the following signature:
-
-```rust
-struct Match {
-  // BCP 47 language tag.
-  tag: &'static str,
-  // English name.
-  name: &'static str,
-  // Name in native script.
-  native: &'static str,
-  // Number of codepoints matched.
-  count: u32,
-  // Score (number of codepoints matched divided by the total).
-  score: f64,
-}
-```
-
-The language data is derived from [Adobe Font's speakeasy library](https://github.com/typekit/speakeasy). The data is vendored in `vendor/speakeasy/data.json`, which is regenerated from the submodule by running `make -C vendor/speakeasy`, and statically compiled as part of the library.
-
-## License
-
-This library is licensed under the Apache-2.0 license. Copyright 2023, [The Type Founders](https://thetypefounders.com).
+[cldr]: https://cldr.unicode.org
+[detect-writing-script]: https://github.com/bramstein/detect-writing-script
 
 [build-img]: https://github.com/the-type-founders/unicode-languages-rs/actions/workflows/build.yml/badge.svg
 [build-url]: https://github.com/the-type-founders/unicode-languages-rs/actions/workflows/build.yml
