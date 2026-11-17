@@ -71,10 +71,11 @@ def parse(value):
 def merge(codepoints):
     ranges = []
     for codepoint in sorted(codepoints):
-        if ranges and ranges[-1][1] + 1 == codepoint:
-            ranges[-1][1] = codepoint
+        # The upper bound is exclusive.
+        if ranges and ranges[-1][1] == codepoint:
+            ranges[-1][1] = codepoint + 1
         else:
-            ranges.append([codepoint, codepoint])
+            ranges.append([codepoint, codepoint + 1])
     return ranges
 
 
@@ -127,7 +128,7 @@ for locale, root in sorted(roots.items()):
             # The name of the language alone is used when the locale has none.
             "name": names.get(locale) or names.get(language),
             "script": script,
-            "codepoints": merge(codepoints),
+            "ranges": merge(codepoints),
         }
     )
 json.dump(data, sys.stdout, ensure_ascii=False, indent=2)

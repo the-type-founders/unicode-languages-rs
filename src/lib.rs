@@ -44,12 +44,12 @@ impl Context {
         let mut counts = vec![0; DATA.len()];
         for [start, end] in codepoints {
             for (count, (.., ranges)) in counts.iter_mut().zip(DATA) {
-                for [lower, upper] in ranges.iter().cloned() {
-                    if start <= upper && lower <= end {
-                        *count += (end.min(upper) - start.max(lower) + 1) as usize;
+                for (lower, upper) in ranges.iter().cloned() {
+                    if start < upper && lower <= end {
+                        *count += ((end + 1).min(upper) - start.max(lower)) as usize;
                     }
                     // The ranges are sorted, and the rest lies beyond.
-                    if end <= upper {
+                    if end < upper {
                         break;
                     }
                 }

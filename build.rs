@@ -7,7 +7,7 @@ struct Language {
     code: String,
     name: Option<String>,
     script: String,
-    codepoints: Vec<[u32; 2]>,
+    ranges: Vec<[u32; 2]>,
 }
 
 const DATA: &str = include_str!("vendor/cldr/data.json");
@@ -23,14 +23,14 @@ fn main() {
         .into_iter()
         .map(|language| {
             let total = language
-                .codepoints
+                .ranges
                 .iter()
-                .map(|[start, end]| (end - start + 1) as usize)
+                .map(|[start, end]| (end - start) as usize)
                 .sum::<usize>();
             let ranges = language
-                .codepoints
+                .ranges
                 .into_iter()
-                .map(|[start, end]| format!("[{start},{end}]"))
+                .map(|[start, end]| format!("({start},{end})"))
                 .collect::<Vec<_>>()
                 .join(",");
             format!(
@@ -42,6 +42,6 @@ fn main() {
         .join(",");
     ok!(write!(
         file,
-        "const DATA: &[(&str, Option<&str>, &str, usize, &[[u32; 2]])] = &[{data}];",
+        "const DATA: &[(&str, Option<&str>, &str, usize, &[(u32, u32)])] = &[{data}];",
     ));
 }
