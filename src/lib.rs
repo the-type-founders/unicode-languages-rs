@@ -31,8 +31,7 @@ impl Context {
     /// Detect languages given ranges of Unicode codepoints.
     ///
     /// Each range is closed, containing both the first and the last codepoint. A single codepoint
-    /// is given as a range whose ends coincide. The ranges should be sorted in ascending order and
-    /// should not overlap.
+    /// is given as a range whose ends coincide. The ranges should not overlap.
     ///
     /// The threshold is the minimum share of the codepoints of a language, from zero to one, that
     /// should be found for the language to be reported. The languages are sorted by this share in
