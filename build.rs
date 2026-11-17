@@ -5,13 +5,13 @@ use std::path::Path;
 
 use serde::Deserialize;
 
-const DATA: &str = include_str!("vendor/speakeasy/data.json");
+const DATA: &str = include_str!("vendor/cldr/data.json");
 
 #[derive(Deserialize)]
 struct Language {
-    tag: String,
-    name: String,
-    native: String,
+    code: String,
+    name: Option<String>,
+    script: String,
     codepoints: Vec<[u32; 2]>,
 }
 
@@ -41,16 +41,16 @@ fn main() {
             language
                 .codepoints
                 .iter()
-                .map(|[lower, upper]| upper - lower + 1)
-                .sum::<u32>()
+                .map(|[lower, upper]| (upper - lower + 1) as usize)
+                .sum::<usize>()
         })
         .collect::<Vec<_>>();
     let metadata = languages
         .iter()
         .map(|language| {
             format!(
-                "Metadata {{ tag: {:?}, name: {:?}, native_name: {:?} }}",
-                language.tag, language.name, language.native,
+                "Metadata {{ code: {:?}, name: {:?}, script: {:?} }}",
+                language.code, language.name, language.script,
             )
         })
         .collect::<Vec<_>>()
@@ -68,9 +68,9 @@ pub type Codepoint = u32;
 pub type Range<T> = [T; 2];
 
 struct Metadata {{
-    tag: &'static str,
-    name: &'static str,
-    native_name: &'static str,
+    code: &'static str,
+    name: Option<&'static str>,
+    script: &'static str,
 }}
 
 #[cfg(not(test))]
@@ -80,27 +80,27 @@ const LANGUAGE_COUNT: usize = {count};
 const LANGUAGE_COUNT: usize = 5;
 
 #[cfg(not(test))]
-const RANGES: [&[Range<Codepoint>]; LANGUAGE_COUNT] = [{ranges}];
+static RANGES: [&[Range<Codepoint>]; LANGUAGE_COUNT] = [{ranges}];
 
 #[cfg(test)]
-const RANGES: [&[Range<Codepoint>]; LANGUAGE_COUNT] = [&[[1, 3]], &[[4, 6]], &[[7, 9]], &[[8, 8]], &[[16,16]]];
+static RANGES: [&[Range<Codepoint>]; LANGUAGE_COUNT] = [&[[1, 3]], &[[4, 6]], &[[7, 9]], &[[8, 8]], &[[16,16]]];
 
 #[cfg(not(test))]
-const TOTALS: [u32; LANGUAGE_COUNT] = {totals:?};
+static TOTALS: [usize; LANGUAGE_COUNT] = {totals:?};
 
 #[cfg(test)]
-const TOTALS: [u32; LANGUAGE_COUNT] = [3, 3, 3, 1, 1];
+static TOTALS: [usize; LANGUAGE_COUNT] = [3, 3, 3, 1, 1];
 
 #[cfg(not(test))]
-const METADATA: [Metadata; LANGUAGE_COUNT] = [{metadata}];
+static METADATA: [Metadata; LANGUAGE_COUNT] = [{metadata}];
 
 #[cfg(test)]
-const METADATA: [Metadata; LANGUAGE_COUNT] = [
-  Metadata {{ tag: "t1", name: "test1", native_name: "ntest1" }},
-  Metadata {{ tag: "t2", name: "test2", native_name: "ntest2" }},
-  Metadata {{ tag: "t3", name: "test3", native_name: "ntest3" }},
-  Metadata {{ tag: "t4", name: "test4", native_name: "ntest4" }},
-  Metadata {{ tag: "t5", name: "test5", native_name: "ntest5" }},
+static METADATA: [Metadata; LANGUAGE_COUNT] = [
+  Metadata {{ code: "t1", name: Some("test1"), script: "s1" }},
+  Metadata {{ code: "t2", name: Some("test2"), script: "s2" }},
+  Metadata {{ code: "t3", name: Some("test3"), script: "s3" }},
+  Metadata {{ code: "t4", name: Some("test4"), script: "s4" }},
+  Metadata {{ code: "t5", name: Some("test5"), script: "s5" }},
 ];
 "#
     )

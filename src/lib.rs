@@ -1,34 +1,26 @@
+//! Detection of languages from Unicode codepoints.
+
 include!(concat!(env!("OUT_DIR"), "/data.rs"));
 
 use std::cmp;
 
-#[derive(Debug)]
-pub struct Match {
-    /// BCP 47 language tag.
-    pub tag: &'static str,
-    /// English name.
-    pub name: &'static str,
-    /// Name in native script.
-    pub native: &'static str,
-    /// Number of codepoints matched.
-    pub count: u32,
-    /// Score (number of codepoints matched divided by the total).
-    pub score: f64,
+/// A language.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Language {
+    /// The BCP 47 code.
+    pub code: &'static str,
+    /// The proper name in English, if known.
+    pub name: Option<&'static str>,
+    /// The ISO 15924 code of the script.
+    pub script: &'static str,
+    /// The number of codepoints found in the language.
+    pub count: usize,
+    /// The total number of codepoints in the language.
+    pub total: usize,
 }
 
-/// Detects language support in a font given a list of Unicode
-/// codepoint ranges.
-///
-/// # Arguments
-///
-/// * `codepoints` - An iterator of codepoint ranges. The iterator
-///   must not contain overlapping ranges and must be sorted in
-///   ascending order.
-/// * `threshold` - The minimum score a language must have to be
-///   returned as a match. Value must be between 0 and 1.
-///
-/// Returns a vector of language matches.
-pub fn detect<T>(codepoints: T, threshold: f64) -> Vec<Match>
+/// Detect languages given ranges of Unicode codepoints.
+pub fn detect<T>(codepoints: T, threshold: f64) -> Vec<Language>
 where
     T: IntoIterator<Item = Range<Codepoint>>,
 {
@@ -38,9 +30,10 @@ where
         for i in 0..LANGUAGE_COUNT {
             for [range_lower, range_upper] in RANGES[i] {
                 if input_lower <= *range_upper && *range_lower <= input_upper {
-                    counts[i] += cmp::min(input_upper, *range_upper)
+                    let count = cmp::min(input_upper, *range_upper)
                         - cmp::max(input_lower, *range_lower)
                         + 1;
+                    counts[i] += count as usize;
                 }
 
                 if input_upper <= *range_upper {
@@ -55,17 +48,18 @@ where
     for i in 0..LANGUAGE_COUNT {
         let score = counts[i] as f64 / TOTALS[i] as f64;
         if score >= threshold && counts[i] > 0 {
-            result.push(Match {
-                tag: METADATA[i].tag,
+            result.push(Language {
+                code: METADATA[i].code,
                 name: METADATA[i].name,
-                native: METADATA[i].native_name,
+                script: METADATA[i].script,
                 count: counts[i],
-                score,
+                total: TOTALS[i],
             });
         }
     }
 
-    result.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap().reverse());
+    // Sort by the share of codepoints found in descending order.
+    result.sort_by(|one, other| (other.count * one.total).cmp(&(one.count * other.total)));
 
     result
 }
@@ -86,8 +80,8 @@ mod tests {
 
         let result = detect(codepoints, 1.0);
         assert_eq!(result.len(), 1);
-        assert_eq!(result[0].tag, "t1");
-        assert_eq!(result[0].name, "test1");
+        assert_eq!(result[0].code, "t1");
+        assert_eq!(result[0].name, Some("test1"));
     }
 
     #[test]
@@ -96,8 +90,8 @@ mod tests {
 
         let result = detect(codepoints, 1.0);
         assert_eq!(result.len(), 1);
-        assert_eq!(result[0].tag, "t1");
-        assert_eq!(result[0].name, "test1");
+        assert_eq!(result[0].code, "t1");
+        assert_eq!(result[0].name, Some("test1"));
     }
 
     #[test]
@@ -110,8 +104,8 @@ mod tests {
     fn it_returns_the_test_language() {
         let result = detect([[1, 1]], 0.0);
         assert_eq!(result.len(), 1);
-        assert_eq!(result[0].tag, "t1");
-        assert_eq!(result[0].name, "test1")
+        assert_eq!(result[0].code, "t1");
+        assert_eq!(result[0].name, Some("test1"))
     }
 
     #[test]
@@ -124,47 +118,47 @@ mod tests {
     fn it_returns_if_threshold_is_met() {
         let result = detect([[1, 3]], 1.0);
         assert_eq!(result.len(), 1);
-        assert_eq!(result[0].tag, "t1");
-        assert_eq!(result[0].name, "test1");
+        assert_eq!(result[0].code, "t1");
+        assert_eq!(result[0].name, Some("test1"));
     }
 
     #[test]
     fn it_returns_if_threshold_is_partially_met() {
         let result = detect([[1, 2]], 0.6);
         assert_eq!(result.len(), 1);
-        assert_eq!(result[0].tag, "t1");
-        assert_eq!(result[0].name, "test1");
+        assert_eq!(result[0].code, "t1");
+        assert_eq!(result[0].name, Some("test1"));
     }
 
     #[test]
     fn it_returns_multiple_languages() {
         let result = detect([[1, 1], [4, 4]], 0.0);
         assert_eq!(result.len(), 2);
-        assert_eq!(result[0].tag, "t1");
-        assert_eq!(result[0].name, "test1");
-        assert_eq!(result[1].tag, "t2");
-        assert_eq!(result[1].name, "test2");
+        assert_eq!(result[0].code, "t1");
+        assert_eq!(result[0].name, Some("test1"));
+        assert_eq!(result[1].code, "t2");
+        assert_eq!(result[1].name, Some("test2"));
     }
 
     #[test]
     fn it_returns_overlapping_languages() {
         let result = detect([[8, 8]], 0.0);
         assert_eq!(result.len(), 2);
-        assert_eq!(result[0].tag, "t4");
-        assert_eq!(result[0].name, "test4");
-        assert_eq!(result[1].tag, "t3");
-        assert_eq!(result[1].name, "test3");
+        assert_eq!(result[0].code, "t4");
+        assert_eq!(result[0].name, Some("test4"));
+        assert_eq!(result[1].code, "t3");
+        assert_eq!(result[1].name, Some("test3"));
     }
 
     #[test]
     fn it_returns_correct_counts_on_partial_range_matches() {
         let result = detect([[3, 5]], 0.0);
         assert_eq!(result.len(), 2);
-        assert_eq!(result[0].tag, "t2");
-        assert_eq!(result[0].name, "test2");
+        assert_eq!(result[0].code, "t2");
+        assert_eq!(result[0].name, Some("test2"));
         assert_eq!(result[0].count, 2);
-        assert_eq!(result[1].tag, "t1");
-        assert_eq!(result[1].name, "test1");
+        assert_eq!(result[1].code, "t1");
+        assert_eq!(result[1].name, Some("test1"));
         assert_eq!(result[1].count, 1);
     }
 
@@ -172,14 +166,14 @@ mod tests {
     fn it_returns_sorted_results() {
         let result = detect([[1, 1], [4, 6]], 0.0);
         assert_eq!(result.len(), 2);
-        assert_eq!(result[0].tag, "t2");
-        assert_eq!(result[1].tag, "t1");
+        assert_eq!(result[0].code, "t2");
+        assert_eq!(result[1].code, "t1");
     }
 
     #[test]
     fn it_handles_ranges_correctly() {
         let result = detect([[12, 20]], 0.0);
         assert_eq!(result.len(), 1);
-        assert_eq!(result[0].tag, "t5");
+        assert_eq!(result[0].code, "t5");
     }
 }
