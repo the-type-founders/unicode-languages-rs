@@ -11,7 +11,7 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 
 VERSION = "49"
-ROOT = f"https://unicode.org/Public/cldr/{VERSION}"
+ROOT = f"https://www.unicode.org/Public/cldr/{VERSION}"
 
 # The first archive contains the locales at the basic level of coverage or
 # above, and the second contains the rest.
