@@ -43,14 +43,14 @@ impl Context {
         let mut counts = vec![0; DATA.len()];
         for [start, end] in codepoints {
             for (count, (.., ranges)) in counts.iter_mut().zip(DATA) {
-                for (lower, upper) in ranges.iter().cloned() {
-                    if start < upper && lower <= end {
-                        *count += ((end + 1).min(upper) - start.max(lower)) as usize;
-                    }
-                    // The ranges are sorted, and the rest lies beyond.
-                    if end < upper {
+                // The ranges are sorted and do not overlap; skip those lying before.
+                let index = ranges.partition_point(|(_, upper)| *upper <= start);
+                for (lower, upper) in ranges[index..].iter().cloned() {
+                    // The rest lies beyond.
+                    if end < lower {
                         break;
                     }
+                    *count += ((end + 1).min(upper) - start.max(lower)) as usize;
                 }
             }
         }
