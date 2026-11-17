@@ -131,5 +131,6 @@ for locale, root in sorted(roots.items()):
             "ranges": merge(codepoints),
         }
     )
+data.sort(key=lambda language: language["code"])
 json.dump(data, sys.stdout, ensure_ascii=False, indent=2)
 sys.stdout.write("\n")

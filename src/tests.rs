@@ -53,18 +53,8 @@ fn overlap() {
 #[test]
 fn order() {
     let languages = Context::default().detect([[0x61, 0x7A]], 0.5);
-    let shares = languages
-        .iter()
-        .map(|language| language.count as f64 / language.total as f64)
-        .collect::<Vec<_>>();
-    assert!(shares.len() > 1);
-    assert!(shares.windows(2).all(|pair| pair[0] >= pair[1]));
-    assert!(shares.iter().all(|share| *share >= 0.5));
-    // The languages that are equally covered are sorted by code.
-    assert!(languages.windows(2).all(|pair| {
-        pair[0].count * pair[1].total != pair[1].count * pair[0].total
-            || pair[0].code < pair[1].code
-    }));
+    assert!(languages.len() > 1);
+    assert!(languages.windows(2).all(|pair| pair[0].code < pair[1].code));
 }
 
 #[test]
