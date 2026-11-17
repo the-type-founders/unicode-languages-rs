@@ -1,11 +1,11 @@
+.PHONY: all
 all: check test
 
+.PHONY: check
 check:
-	cargo clippy --all-features -- -D warnings
+	cargo clippy -- -D warnings
 	cargo fmt --all -- --check
 
+.PHONY: test
 test:
-	cargo build
-	cargo test --all-features
-
-.PHONY: all check test
+	cargo test
