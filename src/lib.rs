@@ -35,7 +35,7 @@ impl Context {
     ///
     /// The threshold is the minimum share of the codepoints of a language, from zero to one, that
     /// should be found for the language to be reported. The languages are sorted by this share in
-    /// descending order.
+    /// descending order with ties broken by code.
     pub fn detect<T>(&self, codepoints: T, threshold: f64) -> Vec<Language>
     where
         T: IntoIterator<Item = [u32; 2]>,
@@ -68,8 +68,11 @@ impl Context {
                 total,
             })
             .collect::<Vec<_>>();
-        // Sort by the share of codepoints found in descending order.
-        languages.sort_by(|one, other| (other.count * one.total).cmp(&(one.count * other.total)));
+        languages.sort_by(|one, other| {
+            (other.count * one.total)
+                .cmp(&(one.count * other.total))
+                .then_with(|| one.code.cmp(other.code))
+        });
         languages
     }
 }
